@@ -9,7 +9,7 @@ Welcome to my data portfolio! Here, I document a summary of my projects in the d
 
 
 ### 🔬 Diabetes Prediction with Ensemble Learning and Transfer Learning 
-🔗[View project](https://github.com/RebecaSuarez22/RebecaSuarez22/tree/main/machine_learning/diabetes_prediction_transfer_learning)  
+🔗[View project](./machine_learning/diabetes_prediction_transfer_learning)  
 
 **Tools:** Python, scikit-learn, TensorFlow, Keras Tuner
 
