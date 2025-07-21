@@ -20,6 +20,11 @@ Whether I’m developing forecasting models, building dashboards for business in
 - **Visualization:** Power BI, Matplotlib, Seaborn  
 - **Web Dev:** Flask, React
 
+### 🧭 Want to explore my projects?
+
+Check out my [Portfolio Guide](https://github.com/RebecaSuarez22/Portfolio-Guide)  
+
+
 ### 📍 Based in Las Palmas de Gran Canaria, Spain  
 ### 📫 [rebecaasuarezojeda@gmail.com](mailto:rebecaasuarezojeda@gmail.com)
 📄 [View my CV](./CV-Rebeca.pdf) | 🔗 [LinkedIn](https://www.linkedin.com/in/rebeca-suarez-22a358245/) | 💻 [GitHub](https://github.com/RebecaSuarez22)
