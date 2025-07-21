@@ -1,32 +1,96 @@
-# 🙋🏻‍♀️ Introducing Myself
-<img width="1584" height="396" alt="Black   White Modern Minimalist Data Analyst LinkedIn Banner (3)" src="https://github.com/user-attachments/assets/3ac7d2f4-399a-4cd5-bebf-e0b5a629772a" />
+# 🗺 Rebeca's Portfolio
+Welcome to my data portfolio! Here, I document a summary of my projects in the data field.
 
-Hello, I'm Rebeca, Data Scientist and AI Engineer with a background in Computer Engineering and a passion for solving real-world problems with data. Over the last few years, I’ve worked on projects ranging from computer vision and OCR to predictive modeling and business intelligence—always with a strong focus on creating impact. I hold a Bachelor's in Computer Engineering and I’m currently pursuing a Master’s in Data Science at the Open University of Catalonia. 
+## 📚 Table of Contents
 
-I’m especially interested in building end-to-end solutions that combine data engineering, machine learning, and intuitive visualizations. I love working with Python, SQL, PySpark and tools like Azure, Databricks, Power BI or Flask.
+---
 
-### 💡 What drives me
-
-Curiosity. I enjoy taking on new challenges and learning fast. I’m not just interested in models—I care about the "why" behind the data and how to translate findings into action.
-
-Whether I’m developing forecasting models, building dashboards for business insights, or integrating AI into real-world workflows, I focus on delivering solutions that are both technically robust and practically valuable.
-
-### ⚙️ Tech Stack
-- **Languages:** Python, SQL, R, C++, Java  
-- **Libraries:** Pandas, NumPy, Scikit-Learn, TensorFlow, Keras, XGBoost  
-- **Big Data:** PySpark, Azure, Databricks
-- **DevOps & Automation:** Git, Power Automate
-- **Data Pipelines & APIs:** REST APIs, Power Automate, Azure Functions
-- **Visualization:** Power BI, Matplotlib, Seaborn  
-- **Web Dev:** Flask, React
-
-### 🧭 Want to explore my projects?
-
-Check out my [Portfolio Guide](https://github.com/RebecaSuarez22/Portfolio-Guide)  
+## 🤖 Machine Learning & Deep Learning
 
 
-### 📍 Based in Las Palmas de Gran Canaria, Spain  
-### 📫 [rebecaasuarezojeda@gmail.com](mailto:rebecaasuarezojeda@gmail.com)
-📄 [View my CV](./CV-Rebeca.pdf) | 🔗 [LinkedIn](https://www.linkedin.com/in/rebeca-suarez-22a358245/) | 💻 [GitHub](https://github.com/RebecaSuarez22)
+### 🔬 Diabetes Prediction with Ensemble Learning and Transfer Learning 
+🔗[View project](https://github.com/RebecaSuarez22/RebecaSuarez22/tree/main/machine_learning/diabetes_prediction_transfer_learning)  
 
+**Tools:** Python, scikit-learn, TensorFlow, Keras Tuner
 
+**Description:**  
+Built predictive models to detect diabetes based on clinical variables using ensemble learning techniques and PCA. Compared performance using original features vs. principal components. Applied transfer learning with a pre-trained neural network to improve final model accuracy.
+
+**Highlights:**
+- Applied PCA to reduce dimensionality while preserving variance.
+- Trained and compared ensemble models including Random Forest and Gradient Boosting.
+- Used transfer learning to fine-tune a neural network on the diabetes dataset.
+- Evaluated results with metrics and visualizations.
+
+---
+
+### 🧩 Conditional GAN for Handwritten Digit Generation
+
+**Tools:** Python, TensorFlow, Keras
+
+**Description:**  
+Developed a Conditional Generative Adversarial Network (cGAN) to generate synthetic handwritten digits based on class labels. Trained on MNIST, the model allowed precise control over the output digit.
+
+**Highlights:**
+- Implemented cGAN architecture from scratch.
+- Visualized training performance and image generation per epoch.
+- Demonstrated the benefit of conditioning compared to vanilla GANs.
+
+---
+
+### 🧩 Sentiment Classification using BERT on IMDB Reviews
+
+**Tools:** Python, TensorFlow, Transformers
+
+**Description:**  
+Fine-tuned a pre-trained BERT model for sentiment analysis on the IMDB movie reviews dataset. Built an end-to-end pipeline with preprocessing, tokenization, training, and evaluation.
+
+**Highlights:**
+- Achieved high classification accuracy with BERT.
+- Compared performance against baseline LSTM.
+- Leveraged HuggingFace Transformers and TensorFlow.
+
+---
+
+### 🧩 Neural Network for Energy Consumption Forecasting
+
+**Tools:** Python, TensorFlow, Keras, Matplotlib
+
+**Description:**  
+Built and trained a feedforward neural network to forecast energy consumption based on historical usage data. Included feature scaling, time series framing, and model evaluation.
+
+**Highlights:**
+- Designed a regression model for energy forecasting.
+- Visualized predicted vs actual values.
+- Improved baseline metrics through feature engineering.
+
+---
+
+### 🧩 Basic Text Classification with Keras
+
+**Tools:** Python, Keras, TensorFlow
+
+**Description:**  
+Implemented a neural network classifier to categorize short text documents. Focused on tokenization, word embedding, and building a multi-class classification model.
+
+**Highlights:**
+- Preprocessed raw text with Keras tokenizer.
+- Used embedding layers and dense networks.
+- Evaluated accuracy and confusion matrix.
+
+---
+
+## 📊 Statistical Analysis & EDA
+
+### 🧩 Sleep Health Statistical Study
+
+**Tools:** R, ggplot2, infer
+
+**Description:**  
+Performed descriptive and inferential statistical analysis to explore associations between sleep patterns and variables like gender, stress level, and BMI.
+
+**Highlights:**
+- Tested four research hypotheses using t-tests and proportions.
+- Built clear visual summaries with ggplot2.
+
+---
