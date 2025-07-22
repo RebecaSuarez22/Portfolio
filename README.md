@@ -24,59 +24,21 @@ Built predictive models to detect diabetes based on clinical variables using ens
 
 ---
 
-### 🧩 Conditional GAN for Handwritten Digit Generation
+###👟 Fashion MNIST Classification with Supervised Learning
+🔗 View project
 
-**Tools:** Python, TensorFlow, Keras
-
-**Description:**  
-Developed a Conditional Generative Adversarial Network (cGAN) to generate synthetic handwritten digits based on class labels. Trained on MNIST, the model allowed precise control over the output digit.
-
-**Highlights:**
-- Implemented cGAN architecture from scratch.
-- Visualized training performance and image generation per epoch.
-- Demonstrated the benefit of conditioning compared to vanilla GANs.
-
----
-
-### 🧩 Sentiment Classification using BERT on IMDB Reviews
-
-**Tools:** Python, TensorFlow, Transformers
+**Tools:** Python, scikit-learn, matplotlib, seaborn, NumPy
 
 **Description:**  
-Fine-tuned a pre-trained BERT model for sentiment analysis on the IMDB movie reviews dataset. Built an end-to-end pipeline with preprocessing, tokenization, training, and evaluation.
+Evaluated and compared multiple supervised learning algorithms on the Fashion MNIST dataset to classify grayscale images of clothing. Explored model performance using metrics and visualizations, and structured the entire pipeline for reproducibility.
 
 **Highlights:**
-- Achieved high classification accuracy with BERT.
-- Compared performance against baseline LSTM.
-- Leveraged HuggingFace Transformers and TensorFlow.
+- Preprocessed and visualized a subset of the Fashion MNIST dataset (5 classes).
+- Compared classifiers including Naive Bayes, KNN, SVM, Decision Tree and Random Forest.
+- Assessed performance using cross-validation and confusion matrices.
+- Structured the training process with reusable components and performance plots.
 
----
 
-### 🧩 Neural Network for Energy Consumption Forecasting
-
-**Tools:** Python, TensorFlow, Keras, Matplotlib
-
-**Description:**  
-Built and trained a feedforward neural network to forecast energy consumption based on historical usage data. Included feature scaling, time series framing, and model evaluation.
-
-**Highlights:**
-- Designed a regression model for energy forecasting.
-- Visualized predicted vs actual values.
-- Improved baseline metrics through feature engineering.
-
----
-
-### 🧩 Basic Text Classification with Keras
-
-**Tools:** Python, Keras, TensorFlow
-
-**Description:**  
-Implemented a neural network classifier to categorize short text documents. Focused on tokenization, word embedding, and building a multi-class classification model.
-
-**Highlights:**
-- Preprocessed raw text with Keras tokenizer.
-- Used embedding layers and dense networks.
-- Evaluated accuracy and confusion matrix.
 
 ---
 
