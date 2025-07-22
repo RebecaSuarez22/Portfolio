@@ -24,10 +24,12 @@ Built predictive models to detect diabetes based on clinical variables using ens
 
 ---
 
-###👟 Fashion MNIST Classification with Supervised Learning
-🔗 View project
+### 👟 Fashion MNIST Classification with Supervised Learning
+🔗[View project](./machine_learning/fashion_mnist_supervised_learning)  
 
-**Tools:** Python, scikit-learn, matplotlib, seaborn, NumPy
+**Tools:** Python, scikit-learn, matplotlib, seaborn, NumPy  
+
+
 
 **Description:**  
 Evaluated and compared multiple supervised learning algorithms on the Fashion MNIST dataset to classify grayscale images of clothing. Explored model performance using metrics and visualizations, and structured the entire pipeline for reproducibility.
