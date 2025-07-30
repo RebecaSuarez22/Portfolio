@@ -46,7 +46,7 @@ Evaluated and compared multiple supervised learning algorithms on the Fashion MN
 
 ## 📊 Statistical Analysis & EDA
 
-### 💤 Sleep Health Statistical Study  
+### 🛌 Sleep Health & Lifestyle - Exploratory Study
 🔗 [View project](./statistical_analysis/sleep_health_statistical_study)
 
 **Tools:** R, R Markdown, tidyverse, ggplot2, infer
@@ -60,3 +60,16 @@ Performed a statistical analysis of sleep habits and lifestyle factors to explor
 - Built confidence intervals and visualized distributions with ggplot2.
 - Report fully rendered in R Markdown and exported to HTML.
 ---
+
+📉 Sleep Health - Hypothesis Testing in R
+🔗 [View project](./statistical_analysis/sleep_hypothesis_testing)
+**Tools:** R, ggplot2, base stats
+
+**Description:**  
+Focused statistical study on sleep duration, stress, gender, and BMI. Tested four hypotheses using t-tests, proportions test, and chi-square to understand the relationships between lifestyle and sleep disorders.
+
+**Highlights:**
+- Evaluated average sleep duration vs. recommended levels.
+- Compared sleep quality between genders.
+- Assessed the impact of stress on sleep disorders.
+- Explored association between BMI and disorder type.
