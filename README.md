@@ -24,8 +24,8 @@ Built predictive models to detect diabetes based on clinical variables using ens
 
 ---
 
-### 👟 Fashion MNIST Classification with Supervised Learning
-🔗[View project](./machine_learning/fashion_mnist_supervised_learning)  
+### 👟 Fashion MNIST Classification with Supervised Learning  
+🔗[View project](./machine_learning/fashion_mnist_supervised_learning)    
 
 **Tools:** Python, scikit-learn, matplotlib, seaborn, NumPy  
 
@@ -61,8 +61,9 @@ Performed a statistical analysis of sleep habits and lifestyle factors to explor
 - Report fully rendered in R Markdown and exported to HTML.
 ---
 
-📉 Sleep Health - Hypothesis Testing in R
+###  📉 Sleep Health - Hypothesis Testing in R
 🔗 [View project](./statistical_analysis/sleep_hypothesis_testing)
+
 **Tools:** R, ggplot2, base stats
 
 **Description:**  
