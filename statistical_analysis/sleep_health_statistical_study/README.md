@@ -1,4 +1,4 @@
-💤 Sleep Health and Lifestyle - Statistical Study
+# 💤 Sleep Health and Lifestyle - Statistical Study
 
 This project applies descriptive and inferential statistics to analyze the relationship between sleep health and lifestyle factors such as BMI, smoking, stress, and chronic diseases.
 
