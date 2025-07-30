@@ -22,7 +22,8 @@ Built predictive models to detect diabetes based on clinical variables using ens
 - Used transfer learning to fine-tune a neural network on the diabetes dataset.
 - Evaluated results with metrics and visualizations.
 
----
+&nbsp;
+
 
 ### 👟 Fashion MNIST Classification with Supervised Learning  
 🔗[View project](./machine_learning/fashion_mnist_supervised_learning)    
@@ -60,7 +61,7 @@ Performed a statistical analysis of sleep habits and lifestyle factors to explor
 - Built confidence intervals and visualized distributions with ggplot2.
 - Report fully rendered in R Markdown and exported to HTML.
   
----
+&nbsp;
 
 ###  📉 Sleep Health - Hypothesis Testing in R
 🔗 [View project](./statistical_analysis/sleep_hypothesis_testing)
@@ -76,7 +77,7 @@ Focused statistical study on sleep duration, stress, gender, and BMI. Tested fou
 - Assessed the impact of stress on sleep disorders.
 - Explored association between BMI and disorder type.
 
----
+&nbsp;
 
 ### 🏠 Rental Price Prediction in Barcelona  
 🔗 [View project](./statistical_analysis/rental_price_regression)
