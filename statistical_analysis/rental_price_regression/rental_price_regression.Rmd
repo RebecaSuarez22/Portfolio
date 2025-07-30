@@ -1,0 +1,545 @@
+---
+title: "Rental Price Prediction in Barcelona"
+author: "Rebeca Suárez Ojeda"
+date: "2025-05-12"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Regresión lineal
+
+## 1.1 Estudio de correlación lineal
+
+```{r}
+library(tidyverse)
+library(corrplot)
+
+datos <- read_csv("Barcelona_Rent_Price_vf.csv", locale = locale(encoding = "UTF-8"))
+head(datos)
+```
+
+```{r}
+datos_cuantitativas <- datos %>%
+  select(price, rooms, bathroom, square_meters) %>%
+  drop_na()
+
+matriz_cor <- cor(datos_cuantitativas, method = "pearson")
+matriz_cor
+
+corrplot(matriz_cor, method = "number", tl.col = "black")
+
+```
+
+```{r}
+cor_precio <- sort(matriz_cor["price", -1], decreasing = TRUE)
+cor_precio
+
+```
+
+- square_meters es la variable que tiene mayor correlacion lineal positiva con el precio del alquiler; cuanto mayor es la superficie, mayor es el precio
+
+- bathroom también presenta una correlacion moderada, cuanto mas baños mayor precio
+
+- rooms tiene una correlacion mas débil con el precio, posiblemente porque hay viviendas con muchas habitaciones pero pequeñas o mal distribuidas. 
+
+Esto indica que el tamaño de la vivienda es el factor cuantitativo más importante para predecir el precio del alquiler.
+
+## 1.2 Estudio comparativo entre barrios de Barcelona
+
+```{r}
+datos <- datos %>%
+  mutate(neighborhood = iconv(neighborhood, from = "", to = "UTF-8"))
+
+datos_filtrados <- datos %>%
+  filter(!is.na(price), !is.na(neighborhood), neighborhood != "")
+
+datos_resumen <- datos_filtrados %>%
+  group_by(neighborhood) %>%
+  summarise(precio_medio = mean(price, na.rm = TRUE))
+
+ggplot(datos_resumen, aes(x = reorder(neighborhood, precio_medio), y = precio_medio)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Precio medio por barrio",
+       x = "Barrio", y = "Precio medio (€)") +
+  scale_y_continuous(labels = scales::comma) + 
+  theme_minimal()
+
+```
+```{r}
+datos_mediana <- datos_filtrados %>%
+  group_by(neighborhood) %>%
+  summarise(precio_mediano = median(price, na.rm = TRUE))
+
+ggplot(datos_mediana, aes(x = reorder(neighborhood, precio_mediano), y = precio_mediano)) +
+  geom_col(fill = "darkorange") +
+  coord_flip() +
+  labs(
+    title = "Precio mediano por barrio (tipo apartment)",
+    x = "Barrio",
+    y = "Precio mediano (€)"
+  ) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal()
+```
+
+
+```{r}
+ggplot(datos_filtrados, aes(x = reorder(neighborhood, price, FUN = median), y = price)) +
+  geom_boxplot(fill = "skyblue") +
+  coord_flip() +
+  labs(
+    title = "Distribución del precio por barrio",
+    x = "Barrio",
+    y = "Precio (€)"
+  ) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal()
+
+```
+
+- Sarria-Sant Gervasi lidera consistentemente como el barrio más caro, tanto en media como en mediana
+
+- Les Corts y Eixample le siguen muy de cerca, aunque Eixample tiene más dispersión.
+
+- Nou Barris es el barrio más asequible, con poca variación de precios.
+
+- Hay una diferencia clara de precio según el barrio, lo que sugiere que el factor “neighborhood” será clave en los modelos predictivos posteriores.
+
+
+## 1.3 Generación de los conjuntos de entrenamiento y de test
+
+```{r}
+set.seed(123) 
+
+datos_modelo <- datos %>%
+  filter(!is.na(price), !is.na(rooms), !is.na(bathroom), !is.na(square_meters),
+         !is.na(lift), !is.na(terrace), !is.na(real_state), !is.na(neighborhood))
+
+n <- nrow(datos_modelo)
+train_indices <- sample(seq_len(n), size = 0.8 * n)
+
+datos_train <- datos_modelo[train_indices, ]
+datos_test <- datos_modelo[-train_indices, ]
+
+cat("Tamaño conjunto de entrenamiento:", nrow(datos_train), "\n")
+cat("Tamaño conjunto de prueba:", nrow(datos_test), "\n")
+```
+## 1.4 Estimación del modelo de regresión lineal con predictores cuantitativos
+
+```{r}
+modelo_cuant <- lm(price ~ rooms + bathroom + square_meters, data = datos_train)
+summary(modelo_cuant)
+```
+
+El modelo resultante muestra que:
+
+- La variable square_meters tiene una fuerte influencia positiva sobre el precio (coef = 14.23).
+
+- bathroom también incrementa el precio (coef = 307.19).
+
+- rooms muestra un coeficiente negativo (coef = –172.35), lo que podría deberse a colinealidad con otras variables.
+
+El modelo explica aproximadamente el 51% de la variabilidad del precio (R² ajustado = 0.5134), y todos los coeficientes son estadísticamente significativos (p < 0.001).
+
+
+### 1.4.1 Comprobación de colinealidad
+
+```{r}
+library(car)
+vif(modelo_cuant)
+```
+
+Se ha comprobado la colinealidad entre las variables rooms, bathroom y square_meters mediante el cálculo del VIF.
+Todos los factores tienen valores por debajo de 4 (rooms = 1.86, bathroom = 2.45, square_meters = 2.95), por lo que no se detecta colinealidad significativa.
+
+En consecuencia, no se elimina ninguna variable del modelo.
+
+
+## 1.5 Estimación del modelo de regresión lineal con predictores cuantitativos y cualitativos
+
+```{r}
+library(dplyr)
+
+datos_train$lift <- as.factor(datos_train$lift)
+datos_train$terrace <- as.factor(datos_train$terrace)
+datos_train$real_state <- as.factor(datos_train$real_state)
+datos_train$neighborhood <- relevel(as.factor(datos_train$neighborhood), ref = "Sarria-Sant Gervasi")
+
+modelo_completo <- lm(price ~ rooms + bathroom + square_meters +
+                        lift + terrace + real_state + neighborhood,
+                      data = datos_train)
+
+
+summary(modelo_completo)
+
+vif(modelo_completo)
+```
+
+Se ha ajustado un modelo de regresión lineal múltiple incluyendo variables cuantitativas y cualitativas. El R2 ajustado ha mejorado de 0.5134 a 0.5878 lo que indica que el nuevo modelo explica casi un 59% de la variabilidad del precio, una mejora respecto al modelo solo con las variables numéricas. 
+
+Según los p-valores, casi todas las varaibles son estadísticamente significativas, a exepción neighborhoodEixample que tiene un valor mayor a 0.05.
+
+Además, la comprobación del VIF confirma quer no existe multicolinealidad grave entre las variables.
+
+Por tanto, mantenemos todas las variables a excepcion de neighborhoodEixample que no es significativa. 
+
+## 1.6 Diagnosis del modelo.
+
+```{r}
+residuos <- resid(modelo_completo)
+valores_ajustados <- fitted(modelo_completo)
+
+hist(residuos,
+     breaks = 50,
+     col = "lightblue",
+     main = "Histograma de residuos",
+     xlab = "Residuos")
+
+plot(valores_ajustados, residuos,
+     main = "Residuos vs Valores ajustados",
+     xlab = "Valores ajustados",
+     ylab = "Residuos",
+     pch = 19, col = "darkgrey")
+abline(h = 0, col = "red")
+
+qqnorm(residuos, main = "QQ Plot de residuos")
+qqline(residuos, col = "blue")
+```
+
+- El histograma muestra una distribución aproximadamente normal, con una ligera asimetría hacia la derecha
+
+- El gráfico de residuos frente a los valores ajustados sugiere que los errores tienden a aumentar con el valor del alquiler, indicando cierta heterocedasticidad.
+
+- El QQ plot confirma que los residuos se ajustan en su mayoría a una distribución normal, aunque hay outliers que generan colas más pesadas.
+
+## 1.7 Predicción del modelo.
+
+```{r}
+datos_test$lift <- as.factor(datos_test$lift)
+datos_test$terrace <- as.factor(datos_test$terrace)
+datos_test$real_state <- as.factor(datos_test$real_state)
+datos_test$neighborhood <- relevel(as.factor(datos_test$neighborhood), ref = "Sarria-Sant Gervasi")
+
+predicciones <- predict(modelo_completo, newdata = datos_test)
+
+reales <- datos_test$price
+
+rmse <- sqrt(mean((predicciones - reales)^2))
+cat("RMSE:", round(rmse, 2))
+```
+
+```{r}
+library(ggplot2)
+
+df_resultados <- data.frame(Reales = reales, Predichos = predicciones)
+
+ggplot(df_resultados, aes(x = Reales, y = Predichos)) +
+  geom_point(alpha = 0.4, color = "steelblue") +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(
+    title = "Valores reales vs predichos",
+    x = "Precio real (€)",
+    y = "Precio predicho (€)"
+  ) +
+  theme_minimal()
+```
+```{r}
+mape <- mean(abs((reales - predicciones) / reales)) * 100
+cat("MAPE:", round(mape, 2), "%")
+```
+
+Aunque el modelo muestra un buen ajuste general, el RMSE de 882 € puede considerarse elevado, especialmente en relación con los precios más frecuentes (1000–2000€).
+
+Esto sugiere que el modelo funciona razonablemente bien para predicciones generales, pero pierde precisión en los extremos (especialmente en viviendas muy caras).
+
+
+# 2. Regresión logística
+
+## 2.1 Preparación de los datos.
+
+```{r}
+
+datos <- datos %>%
+  mutate(square_meters_price = price / square_meters)
+
+datos <- datos %>%
+  mutate(square_meters_price_re = ifelse(square_meters_price < 20, 0, 1))
+
+datos$square_meters_price_re <- as.factor(datos$square_meters_price_re)
+
+head(datos)
+
+datos_log <- datos %>%
+  select(-price, -square_meters, -square_meters_price)
+
+datos_log <- na.omit(datos_log)
+
+set.seed(123)
+n <- nrow(datos_log)
+train_indices <- sample(seq_len(n), size = 0.8 * n)
+
+datos_log_train <- datos_log[train_indices, ]
+datos_log_test <- datos_log[-train_indices, ]
+
+cat("Training:", nrow(datos_log_train), "observaciones\n")
+cat("Test:", nrow(datos_log_test), "observaciones\n")
+
+```
+
+Se ha creado la variable square_meters_price, que representa el precio por metro cuadrado.
+A partir de esta, se ha generado square_meters_price_re, una variable dicotómica que toma el valor 1 si el precio por metro cuadrado es mayor o igual a 20€, y 0 si es inferior.
+
+Para evitar colinealidad en el modelo de regresión logística, se han eliminado las variables price, square_meters y square_meters_price.
+
+Finalmente, se ha dividido el conjunto de datos en entrenamiento (80%) y prueba (20%).
+
+
+## 2.2 Estimación del modelo de regresión logística con el conjunto de entrenamiento
+
+
+```{r}
+datos_log_train$lift <- as.factor(datos_log_train$lift)
+datos_log_train$terrace <- as.factor(datos_log_train$terrace)
+datos_log_train$real_state <- relevel(as.factor(datos_log_train$real_state), ref = "flat")
+datos_log_train$neighborhood <- relevel(as.factor(datos_log_train$neighborhood), ref = "Ciutat Vella")
+
+modelo_log <- glm(square_meters_price_re ~ ., data = datos_log_train, family = binomial)
+
+
+summary(modelo_log)
+```
+
+Los resultados muestran que las variables más influyentes en la probabilidad de que el precio por metro cuadrado sea mayor o igual a 20€ son rooms, bathroom, terrace, y el tipo de inmueble.
+Algunos barrios también presentan efectos significativos, como Eixample, Nou Barris o Les Corts.
+
+En cambio, los barrios como Gracia, Sarria-Sant Gervasi y la variable real_statestudy no resultaron estadísticamente significativas, por lo que se podrían eliminar para simplificar el modelo sin pérdida de precisión.
+
+
+## 2.3 Cálculo de las OR (Odss-Ratio)
+
+```{r}
+or <- exp(coef(modelo_log))
+
+or_ci <- exp(confint(modelo_log))
+
+OR_tabla <- data.frame(
+  OR = round(or, 3),
+  CI_inf = round(or_ci[, 1], 3),
+  CI_sup = round(or_ci[, 2], 3)
+)
+
+OR_tabla
+```
+
+Las variables con OR > 1, como bathroom, terrace, real_stateapartment, real_stateattic y neighborhoodEixample, pueden considerarse factores de riesgo, ya que aumentan la probabilidad de que el precio por metro cuadrado sea mayor o igual a 20€.
+
+Por otro lado, variables como rooms y lift presentan OR < 1, por lo que pueden considerarse factores de protección, al reducir dicha probabilidad.
+
+Las variables real_statestudy y neighborhoodGracia no son concluyentes, ya que sus intervalos de confianza contienen el valor 1
+
+## 2.4 Matriz de confusión
+
+```{r}
+datos_log_test$lift <- as.factor(datos_log_test$lift)
+datos_log_test$terrace <- as.factor(datos_log_test$terrace)
+datos_log_test$real_state <- relevel(as.factor(datos_log_test$real_state), ref = "flat")
+datos_log_test$neighborhood <- relevel(as.factor(datos_log_test$neighborhood), ref = "Ciutat Vella")
+
+probabilidades <- predict(modelo_log, newdata = datos_log_test, type = "response")
+
+pred_clases <- ifelse(probabilidades >= 0.5, 1, 0)
+
+reales <- as.numeric(as.character(datos_log_test$square_meters_price_re))
+
+matriz_conf <- table(Predicho = pred_clases, Real = reales)
+matriz_conf
+```
+```{r}
+VP <- matriz_conf["1", "1"]  # Verdaderos Positivos
+VN <- matriz_conf["0", "0"]  # Verdaderos Negativos
+FP <- matriz_conf["1", "0"]  # Falsos Positivos
+FN <- matriz_conf["0", "1"]  # Falsos Negativos
+
+sensibilidad <- VP / (VP + FN)
+especificidad <- VN / (VN + FP)
+
+cat("Sensibilidad:", round(sensibilidad, 3), "\n")
+cat("Especificidad:", round(especificidad, 3), "\n")
+```
+
+La matriz de confusión muestra que el modelo:
+
+- Clasificó correctamente 1067 pisos baratos (Verdaderos Negativos)
+
+- Clasificó correctamente 129 pisos caros (Verdaderos Positivos)
+
+- Se equivocó con 222 pisos caros (Falsos Negativos)
+
+- Y con 53 pisos baratos (Falsos Positivos)
+
+Las métricas clave son:
+
+- Sensibilidad = 36.89%; el modelo detecta pocos pisos caros, por lo que tiene baja sensibilidad.
+
+- Especificidad = 95.27%; el modelo distingue muy bien los pisos baratos.
+
+Esto sugiere que el modelo prioriza la precisión en detectar pisos baratos, pero tiene dificultad para identificar correctamente los pisos con precio alto por metro cuadrado.
+
+## 2.5 Predicción
+
+```{r}
+datos_resultados <- datos_log_test
+datos_resultados$probabilidad <- round(probabilidades, 4)
+
+viviendas_caras <- datos_resultados[datos_resultados$probabilidad >= 0.5, ]
+
+viviendas_caras_tabla <- viviendas_caras[, c("neighborhood", "real_state", "probabilidad")]
+
+head(viviendas_caras_tabla, 10)
+```
+
+Se han identificado las viviendas del conjunto de prueba cuya probabilidad de tener un precio por metro cuadrado superior o igual a 20€ es mayor o igual a 0.5, según el modelo de regresión logística ajustado.
+
+La mayoría de las viviendas clasificadas como caras pertenecen a los barrios de Ciutat Vella, Eixample y Sants-Montjuic, y son de tipo apartment.
+
+Esto es coherente con los resultados obtenidos en los apartados anteriores, donde estos barrios y este tipo de vivienda mostraron una mayor probabilidad de pertenecer a la clase cara.
+
+
+## 2.6 Bondad del ajuste y curva ROC
+
+```{r}
+dev_null <- modelo_log$null.deviance       
+dev_residual <- modelo_log$deviance       
+df_diff <- modelo_log$df.null - modelo_log$df.residual  
+
+chi_valor <- dev_null - dev_residual
+
+p_valor <- pchisq(chi_valor, df = df_diff, lower.tail = FALSE)
+
+cat("Chi-cuadrado:", round(chi_valor, 3), "\n")
+cat("p-valor:", round(p_valor, 5), "\n")
+```
+
+
+```{r}
+library(pROC)
+
+roc_obj <- roc(datos_log_test$square_meters_price_re, probabilidades)
+
+auc_valor <- auc(roc_obj)
+cat("AUC:", round(auc_valor, 3), "\n")
+
+
+plot(roc_obj, col = "blue", main = "Curva ROC - Modelo Logístico")
+abline(a = 0, b = 1, lty = 2, col = "gray")  
+```
+Se ha evaluado la bondad del ajuste del modelo logístico mediante:
+
+1. Test Chi-cuadrado:
+
+- La diferencia entre la devianza nula y la residual ha sido de 1396.46, con un p-valor = 0, lo que indica que el modelo mejora significativamente al modelo sin predictores.
+
+2. Curva ROC y AUC:
+
+- La curva ROC muestra una buena capacidad de discriminación.
+
+- El valor del AUC ha sido de 0.807, lo que implica que el modelo tiene una probabilidad del 80.7% de clasificar correctamente una vivienda como cara o barata.
+
+En conjunto, estos resultados confirman que el modelo es estadísticamente significativo y útil para la clasificación, aunque, como se observó anteriormente, podría mejorarse la sensibilidad (detección de viviendas caras).
+
+## 2.7 Modelo de regresión logística multinomial
+
+```{r}
+library(nnet)
+
+datos$real_state <- as.factor(datos$real_state)
+
+datos_multi <- datos[, c("real_state", "price", "rooms", "bathroom", "square_meters")]
+datos_multi <- na.omit(datos_multi)
+
+set.seed(123)
+n <- nrow(datos_multi)
+train_indices <- sample(1:n, size = 0.8 * n)
+
+multi_train <- datos_multi[train_indices, ]
+multi_test <- datos_multi[-train_indices, ]
+
+modelo_multi <- multinom(real_state ~ price + rooms + bathroom + square_meters, data = multi_train)
+
+pred_multi <- predict(modelo_multi, newdata = multi_test)
+
+accuracy <- mean(pred_multi == multi_test$real_state)
+cat("Precisión del modelo multinomial:", round(accuracy * 100, 2), "%\n")
+
+table(Predicho = pred_multi, Real = multi_test$real_state)
+
+```
+
+Se ha creado un modelo de regresión logística multinomial para clasificar el tipo de vivienda (real_state) en función del precio, número de habitaciones, baños y metros cuadrados.
+
+El modelo alcanzó una precisión global del 83.71%, lo cual refleja un buen desempeño general. Sin embargo, según la matriz de confusión, el modelo tiende a clasificar la mayoría de las viviendas como flat, debido a la alta frecuencia de esta clase en el conjunto de datos. Este sesgo hacia la clase mayoritaria implica que el modelo predice bien las viviendas flat, pero tiene dificultades para identificar correctamente attic, apartment y study.
+
+Para mejorar la clasificación en las clases minoritarias, podría considerarse balancear los datos, o aplicar modelos más robustos como árboles de decisión o random forest.
+
+## 3 Resumen ejecutivo. Conclusiones del análisis
+
+```{r}
+library(knitr)
+
+resumen <- data.frame(
+  Apartado = c("1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7",
+               "2.1–2.2", "2.3", "2.4", "2.5", "2.6", "2.7"),
+  Pregunta = c(
+    "¿Qué variables cuantitativas se relacionan con el precio?",
+    "¿Qué barrios y tipos de vivienda tienen precios más altos?",
+    "¿Cómo se dividen los datos en entrenamiento y test?",
+    "¿Qué variables explican el precio con un modelo lineal?",
+    "¿Mejora el modelo al añadir variables cualitativas?",
+    "¿Cumple el modelo los supuestos de regresión lineal?",
+    "¿Qué tan bien predice el modelo el precio?",
+    "¿Qué factores explican si un piso es 'caro' (> 20€/m²)?",
+    "¿Qué variables son factores de riesgo o protección?",
+    "¿Qué tal clasifica el modelo logístico binario?",
+    "¿Qué viviendas se predicen como caras?",
+    "¿El modelo es estadísticamente válido y discriminativo?",
+    "¿Se puede predecir el tipo de vivienda?"
+  ),
+  Resultado = c(
+    "Mayor correlación: square_meters (0.69), bathroom (0.58)",
+    "Barrios más caros: Sarria-Sant Gervasi, Eixample",
+    "Train: 5883, Test: 1471 (80/20)",
+    "R² ajustado = 0.5134; todas significativas",
+    "R² ajustado = 0.5878; mejora sin colinealidad",
+    "Residuos aceptables; ligera heterocedasticidad",
+    "RMSE = 882.61 €, MAPE = 23.38%",
+    "Variables clave: bathroom, terrace, tipo y barrio",
+    "OR > 1: riesgo; OR < 1: protección (ej. rooms, lift)",
+    "Sensibilidad: 36.9%; Especificidad: 95.3%",
+    "Mayoría: Ciutat Vella, Eixample, tipo apartment",
+    "Chi² = 1396.46 (p = 0); AUC = 0.807",
+    "Precisión = 83.71%; buen resultado pero sesgo a 'flat'"
+  ),
+  Conclusión = c(
+    "El tamaño y número de baños son claves para el precio",
+    "El barrio influye fuertemente en el precio de alquiler",
+    "División adecuada para modelado supervisado",
+    "El modelo explica bien el precio con variables cuantitativas",
+    "Mejora al añadir factores cualitativos; se mantiene estabilidad",
+    "El modelo cumple los supuestos de regresión lineal",
+    "El modelo funciona bien, aunque con margen de mejora en extremos",
+    "Modelo logístico binario útil; factores claramente influyentes",
+    "Algunos factores aumentan o reducen la probabilidad de ser 'caro'",
+    "Detecta muy bien pisos baratos, peor los caros",
+    "Zonas caras detectadas correctamente según el modelo",
+    "El modelo tiene valor explicativo y buena discriminación",
+    "Buen rendimiento general; necesita mejorar minorías"
+  )
+)
+
+kable(resumen, format = "markdown", align = "l")
+```
+
