@@ -1,0 +1,464 @@
+---
+title: "Sleep Hypothesis Testing"
+author: "Rebeca Suárez Ojeda"
+date: "2025-04-25"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r}
+library(ggplot2)
+library(readxl)
+df <- read_excel("sleephealth_processed.xlsx")
+head(df)
+```
+
+# 1. Breve análisis visual
+
+## 1.1 PR1: ¿La media de horas de sueño de las personas en el estudio es significativamente inferior a 7.5 horas diarias?  
+
+A continuación se presenta la distribución de la variable `SH` (horas de sueño). 
+
+```{r}
+ggplot(df, aes(y = SH)) +
+  geom_boxplot(fill = "#ffcc99", outlier.color = "red") +
+  geom_hline(yintercept = 7.5, color = "blue", linetype = "dashed", size = 1) +
+  labs(
+    title = "Boxplot de horas de sueño (SH)",
+    y = "Horas de sueño"
+  ) +
+  theme_minimal()
+
+
+```
+El gráfico muestra la distribución de las horas de sueño (`SH`) en la muestra. La línea azul marca el umbral de 7.5 horas, que es el valor de referencia en la hipótesis.
+
+La mediana se encuentra visiblemente por debajo de este valor, lo que sugiere que podría cumplirse la hipótesis de que las personas duermen menos de 7.5 horas diarias en promedio. Este resultado será confirmado en el análisis inferencial posterior.
+
+## 1.2 PR2: ¿Existen diferencias en la calidad del sueño entre géneros?
+
+```{r, fig.align="center", out.width="70%"}
+ggplot(df, aes(x = Gender, y = SQ, fill = Gender)) +
+  geom_boxplot(outlier.color = "red", alpha = 0.7) +
+  labs(
+    title = "Calidad del sueño (SQ) según género",
+    x = "Género",
+    y = "Calidad del sueño (1–10)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+El gráfico compara la calidad del sueño (`SQ`) entre hombres y mujeres. A simple vista se aprecia que las mujeres tienen una mediana de calidad del sueño ligeramente más alta que los hombres.
+
+Estas diferencias visuales serán examinadas estadísticamente mediante un contraste de hipótesis en los apartados inferenciales posteriores.
+
+## 1.3 PR3: ¿La proporción de personas con trastorno del sueño es mayor en las personas con niveles altos de estrés en comparación con las que presentan niveles bajos de estrés?  
+
+Para esta pregunta, se ha clasificado el nivel de estrés en dos grupos: bajo (<= 5) y alto (> 5).. A continuación, se representa la proporción de personas con o sin trastornos del sueño (`SD`) en cada grupo.
+
+
+```{r}
+df$Stress_level <- ifelse(df$Stress > 5, "Alto", "Bajo")
+df$Stress_level <- factor(df$Stress_level, levels = c("Bajo", "Alto"))
+
+ggplot(df, aes(x = Stress_level, fill = SD)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Proporción de trastornos del sueño según nivel de estrés",
+    x = "Nivel de estrés",
+    y = "Proporción",
+    fill = "Trastorno del sueño"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+```
+
+Se observa que:
+
+- Las personas con estrés alto presentan una menor proporción de personas sin trastorno (`None`).
+- Hay una mayor presencia de trastornos como Insomnia y Sleep Apnea en el grupo con estrés alto.
+
+Esto sugiere que podría existir una relación entre el nivel de estrés y la aparición de trastornos del sueño, hipótesis que se evaluará más adelante con un contraste de proporciones.
+
+## 1.4 PR4: ¿Existe una relación significativa entre la categoría de BMI (body mass index) y la presencia de trastornos del sueño?  
+
+A continuación se presenta un gráfico que muestra la proporción de tipos de trastorno del sueño (`SD`) según la categoría de índice de masa corporal (`BMI`).
+
+```{r}
+ggplot(df, aes(x = BMI, fill = SD)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Distribución de trastornos del sueño según categoría de BMI",
+    x = "Categoría de BMI",
+    y = "Proporción",
+    fill = "Trastorno del sueño"
+  ) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+```
+
+En el gráfico se observa que las personas con un BMI normal tienen mayor proporción de individuos sin trastornos del sueño (`None`), mientras que los grupos con sobrepeso (`Overweight`) y obesidad (`Obese`) muestran una mayor proporción de trastornos, especialmente Sleep Apnea.
+
+Este patrón visual sugiere una posible relación entre el índice de masa corporal y la aparición de trastornos del sueño, que será evaluada posteriormente mediante un test estadístico de independencia.
+
+---
+
+# 2. Media de horas de sueño (PR1)  
+
+## 2.1 Hipótesis  
+
+Se quiere comprobar si la media de horas de sueño (`SH`) es significativamente inferior a 7.5 horas. Se plantean las siguientes hipótesis:
+
+- $H_0$: $\mu = 7.5$ 
+- $H_1$: $\mu < 7.5$
+
+## 2.2 Elección del test  
+
+Dado que:
+
+- La variable SH es numérica continua
+
+- Se compara una media muestral contra una constante poblacional (7.5)
+
+- El tamaño muestral es grande (n = 374)
+
+Test seleccionado: t-test de una muestra (una cola)
+Justificación: el teorema central del límite permite aplicar el t-test con seguridad.
+
+## 2.3 Test en R  
+
+```{r}
+sh <- df$SH
+t.test(sh, mu = 7.5, alternative = "less")
+```
+
+## 2.4 Desarrollo  
+
+Usamos la fórmula del t-score y luego calculamos el valor p con pt():
+
+```{r}
+x <- mean(df$SH)
+mu0 <- 7.5
+s <- sd(df$SH)
+n <- length(df$SH)
+
+# t observado
+t_obs <- (x - mu0) / (s / sqrt(n))
+
+# p-valor
+p_valor <- pt(t_obs, df = n - 1)
+
+t_critico <- qt(0.05, df = n - 1)  
+```
+
+## 2.5 Resultados  
+
+```{r}
+list(
+  media_muestral = x,
+  t_observado = t_obs,
+  p_valor = p_valor,
+  t_critico = t_critico
+)
+```
+- Media observada: 7.13
+- t observado: -8.93
+- Valor p: ~0.0000
+- t crítico (nivel $\alpha$ = 0.05): -1.65
+
+## 2.5 Respuesta a la pregunta de investigación  
+
+Los resultados obtenidos con la función propia son consistentes con los generados por la función `t.test()` de R. Ambos arrojan un valor t de aproximadamente -8.93 y un valor p extremadamente bajo, confirmando la validez de la implementación.
+
+Dado que el valor t observado es mucho más extremo que el valor crítico, y el valor p es muy inferior a 0.05, se cumple la condición para **rechazar la hipótesis nula**. 
+
+Por tanto, se concluye que la media de horas de sueño de los participantes es **significativamente menor que 7.5 horas diarias**, con un 95% de confianza.
+
+---
+
+# 3. Diferencias en la calidad del sueño según género (PR2)  
+
+## 3.1 Hipótesis  
+
+Queremos comparar la media de `SQ` (calidad del sueño) entre dos grupos: `Female` y `Male`.
+
+Las hipótesis planteadas son:
+
+- $H_0$: $\mu_1 = \mu_2$ (la media de SQ es igual en ambos géneros)  
+- $H_1$: $\mu_1 \ne \mu_2$ (existen diferencias en la media de SQ entre géneros)
+
+Se trata de un contraste **bilateral**, ya que no se especifica en la hipótesis si un grupo debe tener mayor `SQ` que el otro.
+
+## 3.2 Elección del test  
+
+Dado que:
+
+  - Comparamos la media de una variable cuantitativa (SQ) entre dos grupos independientes (Gender)
+
+  - La variable SQ es una escala numérica de 1 a 10
+
+  - Asumimos que el tamaño de cada grupo es razonablemente grande
+
+Test seleccionado: t.test() para muestras independientes
+
+Justificación: el test t de Student es apropiado para comparar medias entre dos grupos independientes cuando se asume normalidad o cuando el tamaño muestral lo compensa.
+
+
+## 3.3 Test en R  
+
+```{r}
+t.test(SQ ~ Gender, data = df, alternative = "two.sided")
+```
+
+## 3.4 Desarrollo  
+
+Usamos la fórmula del t para dos muestras y calculamos el valor p con pt() y los grados de libertad con la fórmula de Welch:
+
+```{r}
+# Subgrupos
+sq_f <- df$SQ[df$Gender == "Female"]
+sq_m <- df$SQ[df$Gender == "Male"]
+
+# Estadísticos
+n1 <- length(sq_f); n2 <- length(sq_m)
+m1 <- mean(sq_f);  m2 <- mean(sq_m)
+s1 <- sd(sq_f);    s2 <- sd(sq_m)
+
+# t observado
+t_obs <- (m1 - m2) / sqrt((s1^2 / n1) + (s2^2 / n2))
+
+# Grados de libertad (Welch)
+df_welch <- ((s1^2 / n1 + s2^2 / n2)^2) /
+  (( (s1^2 / n1)^2 / (n1 - 1) ) + ( (s2^2 / n2)^2 / (n2 - 1) ))
+
+# p-valor bilateral
+p_valor <- 2 * pt(-abs(t_obs), df = df_welch)
+
+# Valor crítico bilateral 
+t_critico <- qt(0.975, df = df_welch)
+
+```
+
+## 3.5 Resultados  
+
+```{r}
+list(
+  media_female = m1,
+  media_male = m2,
+  t_observado = t_obs,
+  df = df_welch,
+  p_valor = p_valor,
+  t_critico = t_critico
+)
+```
+- Media Female: 7.6649
+- Media Male: 6.9683
+- t observado: 5.859
+- Grados de libertad: 347.96
+- t crítico bilateral ($\alpha = 0.05$): $\pm 1.9668$
+- Valor p: 1.078 × 10^-8
+
+## 3.6 Respuesta a la pregunta de investigación  
+
+Dado que el valor p es significativamente menor que 0.05, se rechaza la hipótesis nula.
+Concluimos que existen diferencias estadísticamente significativas en la calidad del sueño entre géneros, siendo mayor la media en mujeres.
+
+---
+
+# 4. ¿El estrés influye en los trastornos del sueño? (PR3)  
+
+## 4.1 Hipótesis  
+Queremos comparar la proporción de personas con trastorno del sueño entre dos grupos de estrés: bajo (<=6) y alto (>6).
+
+- $H_0$: $p_1 = p_2$  
+- $H_1$: $p_1 < p_2$
+
+Se trata de un contraste de proporciones unilateral (una cola por la derecha), ya que la hipótesis alternativa indica una mayor proporción en el grupo de estrés alto.
+
+## 4.2 Elección del test  
+
+Dado que:
+
+  - Las variables son categóricas
+
+  - Compararemos proporciones entre dos grupos independientes
+
+  - La muestra es suficientemente grande
+
+Test seleccionado: test de proporciones para dos muestras (prop.test() o test z manual)
+
+Justificación: se quiere comparar la proporción de éxito (tener trastorno del sueño) entre dos grupos independientes (estrés bajo vs alto), lo que justifica el uso de un contraste de proporciones.
+
+## 4.3 Test en R  
+
+Primero creamos la variable Stress_level y la variable binaria Tiene_SD:
+
+```{r}
+df$Stress_level <- ifelse(df$Stress > 6, "Alto", "Bajo")
+df$Tiene_SD <- ifelse(df$SD %in% c("Sleep Apnea", "Insomnia"), 1, 0)
+```
+
+Creamos la tabla:
+
+```{r}
+table(df$Stress_level, df$Tiene_SD)
+```
+Y aplicamos el test:
+```{r}
+# Números de personas con trastorno en cada grupo
+x <- c(
+  sum(df$Tiene_SD[df$Stress_level == "Bajo"]),
+  sum(df$Tiene_SD[df$Stress_level == "Alto"])
+)
+
+# Tamaños de cada grupo
+n <- c(
+  sum(df$Stress_level == "Bajo"),
+  sum(df$Stress_level == "Alto")
+)
+
+prop.test(x = x, n = n, alternative = "less", correct = FALSE)
+```
+## 4.4 Desarrollo  
+
+Implementación manual del test de dos proporciones:
+
+```{r}
+# Proporciones
+p1 <- x[1] / n[1]
+p2 <- x[2] / n[2]
+
+# Proporción combinada (pooling)
+p_pool <- (x[1] + x[2]) / (n[1] + n[2])
+
+# Estadístico z
+z_obs <- (p1 - p2) / sqrt(p_pool * (1 - p_pool) * (1/n[1] + 1/n[2]))
+
+# Valor p (una cola)
+p_valor <- pnorm(z_obs)
+
+# Valor crítico z (una cola, alfa = 0.05)
+z_critico <- qnorm(0.05)
+
+```
+
+## 4.5 Resultados  
+
+```{r}
+list(
+  p1 = p1,
+  p2 = p2,
+  z_observado = z_obs,
+  z_critico = z_critico,
+  p_valor = p_valor
+)
+```
+- Proporción con trastorno (estrés bajo): 27.96%
+- Proporción con trastorno (estrés alto): 70.00%
+- Estadístico z observado: -7.71
+- Valor crítico z ($\alpha = 0.05$): -1.645
+- Valor p: 6.52 × 10^-15
+
+## 4.6 Respuesta a la pregunta de investigación  
+
+El valor p es muy inferior al nivel de significación de 0.05, y el estadístico z observado está muy por debajo del valor crítico.
+Por tanto, se rechaza la hipótesis nula y se concluye que la proporción de trastornos del sueño es significativamente mayor en personas con niveles altos de estrés.
+
+---
+
+# 5.  BMI y trastornos del sueño (PR4)  
+
+## 5.1 Hipótesis  
+
+Queremos comprobar si existe relación entre la categoría de IMC (`BMI`) y el tipo de trastorno del sueño (`SD`).
+
+- $H_0$: `BMI` y `SD` son independientes.  
+- $H_1$: `BMI` y `SD` **no** son independientes.
+
+Es un contraste de independencia entre dos variables categóricas.
+
+## 5.2 Elección del test  
+
+Ambas variables (`BMI` y `SD`) son categóricas, por lo tanto, el test más adecuado para estudiar su relación es el test de independencia de chi-cuadrado aplicado sobre una tabla de contingencia.
+
+Este test permite evaluar si la distribución de una variable categórica varía en función de otra variable categórica.
+
+## 5.3 Test en R
+
+```{r}
+# Tabla de contingencia
+tabla_bmi_sd <- table(df$BMI, df$SD)
+
+# Test de chi-cuadrado
+chisq.test(tabla_bmi_sd)
+```
+
+## 5.4 Respuesta a la pregunta de investigación  
+
+Dado que el valor p es muy inferior al nivel de significación de 0.05, se rechaza la hipótesis nula.  
+Podemos concluir que existe una relación estadísticamente significativa entre la categoría de índice de masa corporal (`BMI`) y los trastornos del sueño (`SD`).
+
+Este resultado indica que la distribución de los tipos de trastorno del sueño no es uniforme entre los distintos grupos de BMI.
+
+---
+
+# 6. Tabla resumen  
+
+```{r}
+library(knitr)
+library(kableExtra)
+
+tabla_resumen <- data.frame(
+  Pregunta = c(
+    "PR1: ¿La media de SH es inferior a 7.5 horas?",
+    "PR2: ¿Existen diferencias en la calidad del sueño (SQ) entre géneros?",
+    "PR3: ¿Hay más trastornos del sueño en personas con estrés alto?",
+    "PR4: ¿Existe relación entre BMI y SD?"
+  ),
+  `Test aplicado` = c(
+    "t-test de una muestra (una cola)",
+    "t-test para muestras independientes (bilateral)",
+    "Test de proporciones (una cola)",
+    "Test de independencia Chi-cuadrado"
+  ),
+  `Valor p` = c(
+    "< 2.2e-16",
+    "1.078e-08",
+    "6.52e-15",
+    "< 2.2e-16"
+  ),
+  Conclusión = c(
+    "Sí, la media de SH es significativamente menor que 7.5 horas",
+    "Sí, hay diferencias significativas en SQ entre géneros",
+    "Sí, mayor proporción de SD en personas con estrés alto",
+    "Sí, hay relación significativa entre BMI y SD"
+  )
+)
+
+kable(tabla_resumen, caption = "Resumen del análisis inferencial") %>%
+  kable_styling(full_width = FALSE)
+
+```
+
+---
+
+# 7. Resumen ejecutivo  
+
+En este estudio analizamos cómo duermen 374 personas y qué factores se asocian a los trastornos del sueño. Los hallazgos clave son:
+
+  - Dormimos menos de lo recomendable.
+  La media de horas de sueño en la muestra es 7,1 h, por debajo del umbral saludable de 7,5 h.
+
+  - La calidad del sueño difiere entre hombres y mujeres.
+  Las mujeres puntúan su descanso algo mejor que los hombres (7,7 frente a 7,0 en una escala de 1-10).
+
+  - El estrés pasa factura al descanso.
+  Entre quienes tienen estrés alto, 7 de cada 10 sufren insomnio o apnea; con estrés bajo la cifra cae a 3 de cada 10.
+
+  - El peso también importa.
+  La apnea del sueño es mucho más frecuente en personas con sobrepeso u obesidad que en quienes tienen un peso normal.
+
+En conjunto, los resultados sugieren que gestionar el estrés y mantener un peso saludable son clave para mejorar la calidad del sueño. Las diferencias por género apuntan, además, a la conveniencia de adaptar las recomendaciones de higiene del sueño a las necesidades específicas de cada colectivo.
