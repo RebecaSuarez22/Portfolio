@@ -1,4 +1,4 @@
-# 💤 Sleep Health and Lifestyle - Statistical Study
+<img width="861" height="231" alt="image" src="https://github.com/user-attachments/assets/d501df6f-2c36-4c32-8221-d3d44490df0c" /># 💤 Sleep Health and Lifestyle - Statistical Study
 
 This project applies descriptive and inferential statistics to analyze the relationship between sleep health and lifestyle factors such as BMI, smoking, stress, and chronic diseases.
 
@@ -27,10 +27,12 @@ We analyze a dataset containing information on sleep duration, BMI, exercise, sm
 
 ## 📁 Project Structure
 
+```text
 📂 sleep_health_statistical_study  
 ├── sleep_health_statistical_study.Rmd      # R Markdown with full analysis  
 ├── sleep_health_statistical_study.html     # Rendered HTML report  
 └── README.md                               # Project overview and instructions
+```
 
 ## 📌 Author
 
