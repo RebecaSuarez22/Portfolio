@@ -59,6 +59,7 @@ Performed a statistical analysis of sleep habits and lifestyle factors to explor
 - Performed t-tests, ANOVA and chi-square tests to evaluate hypotheses.
 - Built confidence intervals and visualized distributions with ggplot2.
 - Report fully rendered in R Markdown and exported to HTML.
+  
 ---
 
 ###  📉 Sleep Health - Hypothesis Testing in R
@@ -74,3 +75,19 @@ Focused statistical study on sleep duration, stress, gender, and BMI. Tested fou
 - Compared sleep quality between genders.
 - Assessed the impact of stress on sleep disorders.
 - Explored association between BMI and disorder type.
+
+---
+
+### 🏠 Rental Price Prediction in Barcelona  
+🔗 [View project](./statistical_analysis/rental_price_regression)
+
+**Tools:** R, ggplot2, caret, glm
+
+**Description:**  
+Built and evaluated linear and logistic regression models to predict rental prices in Barcelona based on property characteristics. Combined exploratory data analysis with model selection, diagnostics, and performance evaluation.
+
+**Highlights:**
+- Cleaned and visualized real-world rental data from Barcelona.
+- Applied multiple linear regression and logistic regression.
+- Interpreted model coefficients and validated assumptions.
+- Evaluated predictive performance using MAE, RMSE, and classification metrics.
