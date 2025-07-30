@@ -26,12 +26,13 @@ The analysis is based on a dataset of 374 individuals. The study addresses four 
 
 ## 📁 Project Structure
 
+```text
 📂 sleep_hypothesis_testing
 ├── sleep_hypothesis_testing.Rmd     # R Markdown with full analysis  
 ├── sleep_hypothesis_testing.html    # Rendered HTML report  
-├── sleephealth_processed.xlsx       # Dataset
+├── sleephealth_processed.xlsx       # Dataset  
 └── README.md                        # Project overview and instructions
-
+```
 
 ## 🧪 Key Results
 
