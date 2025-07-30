@@ -28,9 +28,9 @@ We analyze a dataset containing information on sleep duration, BMI, exercise, sm
 ## 📁 Project Structure
 
 📂 sleep_health_statistical_study  
-├── A1_Suarez_Ojeda_Rebeca.Rmd         # R Markdown with full analysis  
-├── sleep_health_statistical_study.html # Rendered HTML report  
-└── README.md                          # Project overview and instructions
+├── sleep_health_statistical_study.Rmd      # R Markdown with full analysis  
+├── sleep_health_statistical_study.html     # Rendered HTML report  
+└── README.md                               # Project overview and instructions
 
 ## 📌 Author
 
