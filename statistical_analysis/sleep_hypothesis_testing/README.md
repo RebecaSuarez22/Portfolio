@@ -1,4 +1,4 @@
-# 💤 Sleep Health Statistical Study
+# 💤 Sleep Health – Hypothesis Testing in R
 
 This project explores the relationship between various factors (gender, stress, BMI) and sleep health indicators (hours of sleep, sleep quality, presence of disorders) using descriptive and inferential statistical techniques in R.
 
